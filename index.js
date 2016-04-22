@@ -1,16 +1,34 @@
+/*
+This module contains all of the DOM related code. 
+ */
+
 var challenger = require('./challenger')
 const esprima = require('esprima')
 
+/*
+whitelist: the recieved code must have these elements
+blacklist: the received code cannot have these elements
+structure: the received code must have a rough structure representing each of the arrays
+in descending order
+ */
 const whitelist = ['ForStatement', 'IfStatement']
 const blacklist = ['WhileStatement', 'VariableDeclaration']
-const structure = [['IfStatement', 'VariableDeclaration']]
+const structure = [['IfStatement', 'VariableDeclaration'],['IfStatement', 'WhileStatement']]
 
+
+/*
+Parses the code asynchronously 
+ */
 const parse = (code) => {
   return new Promise((resolve) => {
     resolve(esprima.parse(code))
   })
 }
 
+
+/*
+Updates the DOM based on the presence of each of the requirements
+ */
 const updateDisplay = (parsed) => {
   whitelist.forEach(statement=> {
     const element = document.getElementsByClassName(statement)[0]
@@ -38,6 +56,11 @@ const updateDisplay = (parsed) => {
   })
 }
 
+/*
+Initial rendering of the requirements onto the DOM, as well as initialize
+the editor. 
+ */
+
 document.addEventListener("DOMContentLoaded", e=> {
   addToDisplay('whitelist', whitelist)
   addToDisplay('blacklist', blacklist)
@@ -48,11 +71,16 @@ document.addEventListener("DOMContentLoaded", e=> {
   editor.getSession().on('change', e => {
     parse(editor.getValue())
       .then(updateDisplay)
-      .catch((err)=> {
+      .catch(()=> {
       })
   })
 })
 
+
+/*
+Add each element to the appropriate <ul> in the DOM, assigning each element
+the same class as the name of the element
+ */
 const addToDisplay = (appendClass, classList, textList=classList) => {
   const ulElement = document.getElementsByClassName(appendClass)[0]
   classList.forEach((word,i) => {
@@ -64,6 +92,10 @@ const addToDisplay = (appendClass, classList, textList=classList) => {
   })
 }
 
+/*
+The class for rendering structure is simply all of the elements in the structure 
+concatenated together
+ */
 const joinStructureList = (char, list) => list.map(el => el.join(char))
 
 const addStructureToDisplay = (appendClass, list) => {
